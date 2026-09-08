@@ -703,7 +703,7 @@ async function deliverFile(blob, filename, title) {
   const file = new File([blob], filename, { type: blob.type });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
-      await navigator.share({ files: [file], title: title || filename });
+      await navigator.share({ files: [file] });
       markExport(); return 'shared';
     } catch (err) {
       if (err && err.name === 'AbortError') return 'cancel';   // utilizatorul a anulat
