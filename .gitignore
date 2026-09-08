@@ -1,0 +1,17 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor directories
+.vscode/
+.idea/
+
+# Python cache (make_icons.py)
+__pycache__/
+*.pyc
+
+# Logs
+*.log
+
+prompt.txt

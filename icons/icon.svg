@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Ture & Concediu — iconita PWA (sursa vectoriala editabila)
+
+  Concept: un disc taiat vertical in doua — SOARE (tura de zi) si LUNA
+  (tura de noapte). Se citeste instant, chiar si la ~60 px pe ecranul
+  principal al telefonului. Culorile sunt aceleasi ca in aplicatie:
+    zi     #f59e0b
+    noapte #a855f7
+    fundal #0b0f16
+
+  Dupa orice modificare aici, regenereaza fisierele PNG:
+    python make_icons.py
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#141c2b"/>
+      <stop offset="1"   stop-color="#0b0f16"/>
+    </linearGradient>
+    <linearGradient id="dayGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbbf24"/>
+      <stop offset="1" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="nightGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c084fc"/>
+      <stop offset="1" stop-color="#a855f7"/>
+    </linearGradient>
+
+    <!-- jumatatea stanga a discului -->
+    <clipPath id="leftHalf"><rect x="0" y="0" width="248" height="512"/></clipPath>
+    <!-- jumatatea dreapta a discului -->
+    <clipPath id="rightHalf"><rect x="264" y="0" width="248" height="512"/></clipPath>
+    <!-- decupaj pentru semiluna: centrul la stanga cusaturii, deci ramane
+         arcul exterior, cu concavitatea spre soare -->
+    <mask id="moonMask">
+      <rect x="0" y="0" width="512" height="512" fill="#fff"/>
+      <circle cx="210" cy="256" r="140" fill="#000"/>
+    </mask>
+  </defs>
+
+  <!-- fundal, colturi rotunjite -->
+  <rect x="0" y="0" width="512" height="512" rx="112" ry="112" fill="url(#bg)"/>
+
+  <!-- raze radiale, in evantai doar pe partea soarelui (stanga) -->
+  <g stroke="#fbbf24" stroke-width="19" stroke-linecap="round">
+    <line x1="136" y1="136" x2="116" y2="116"/>
+    <line x1="99"  y1="191" x2="73"  y2="180"/>
+    <line x1="86"  y1="256" x2="58"  y2="256"/>
+    <line x1="99"  y1="321" x2="73"  y2="332"/>
+    <line x1="136" y1="376" x2="116" y2="396"/>
+  </g>
+
+  <!-- SOARE — jumatatea de zi -->
+  <g clip-path="url(#leftHalf)">
+    <circle cx="256" cy="256" r="152" fill="url(#dayGrad)"/>
+  </g>
+
+  <!-- LUNA — jumatatea de noapte, cu decupaj de semiluna -->
+  <g clip-path="url(#rightHalf)" mask="url(#moonMask)">
+    <circle cx="256" cy="256" r="152" fill="url(#nightGrad)"/>
+  </g>
+</svg>

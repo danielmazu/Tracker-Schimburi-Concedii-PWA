@@ -1,0 +1,21 @@
+{
+  "name": "Ture & Concediu",
+  "short_name": "Ture",
+  "description": "Tracker pentru ture 12/24 si concediu de odihna",
+  "lang": "ro",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "fullscreen", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#0b0f16",
+  "theme_color": "#0b0f16",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

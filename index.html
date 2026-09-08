@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<title>Ture &amp; Concediu</title>
+<meta name="description" content="Tracker pentru ture 12/24 in 4 ture si concediu de odihna">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0f16">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ture">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-dot"></span>
+    <h1>Ture &amp; Concediu</h1>
+  </div>
+  <div class="top-right">
+    <span class="my-team" id="myTeamBadge">—</span>
+    <button id="btnSettings" class="icon-btn" aria-label="Setari" title="Setari">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6 1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.35.44.6.81.71H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- ===== URMATOAREA TURA (compact) ===== -->
+  <section class="card next-card" id="nextCard">
+    <div class="next-top">
+      <span class="next-label">Urmatoarea tura</span>
+      <span class="pill" id="nextPill">—</span>
+    </div>
+    <div class="next-when" id="nextWhen">—</div>
+    <div class="next-count" id="nextCount">—</div>
+    <div class="next-now" id="nextNow" hidden></div>
+  </section>
+
+  <!-- ===== CONTOR CONCEDIU (compact) ===== -->
+  <section class="stats">
+    <div class="stat"><b id="statTotal">0</b><span>Total</span></div>
+    <div class="stat"><b class="accent-used" id="statUsed">0</b><span>Consumate</span></div>
+    <div class="stat"><b class="accent-left" id="statLeft">0</b><span>Ramase</span></div>
+    <div class="stat-bar"><div class="stat-bar-fill" id="statBar"></div></div>
+    <div class="stat-year" id="statYear">2026</div>
+  </section>
+
+  <!-- ===== CALENDAR ===== -->
+  <section class="card calendar-card">
+    <div class="cal-nav">
+      <button class="nav-btn" id="prevYear" aria-label="Anul anterior">&#171;</button>
+      <button class="nav-btn" id="prevMonth" aria-label="Luna anterioara">&#8249;</button>
+      <button class="cal-title" id="calTitle">—</button>
+      <button class="nav-btn" id="nextMonth" aria-label="Luna urmatoare">&#8250;</button>
+      <button class="nav-btn" id="nextYear" aria-label="Anul urmator">&#187;</button>
+    </div>
+
+    <div class="cal-dow">
+      <span>L</span><span>Ma</span><span>Mi</span><span>J</span><span>V</span><span class="we">S</span><span class="we">D</span>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+
+    <div class="day-nav">
+      <button class="nav-btn small" id="prevDay" aria-label="Ziua anterioara">&#8249;</button>
+      <div class="day-nav-info" id="dayNavInfo">—</div>
+      <button class="nav-btn small" id="nextDay" aria-label="Ziua urmatoare">&#8250;</button>
+    </div>
+
+    <div class="legend">
+      <span><i class="chip zi"></i>Tura de zi</span>
+      <span><i class="chip noapte"></i>Tura de noapte</span>
+      <span><i class="chip mine" id="lgMine"></i>Tura ta</span>
+      <span><i class="sw sw-today"></i>Ziua de azi</span>
+      <span><i class="sw sw-vac"></i>Concediu — consuma</span>
+      <span><i class="sw sw-vacfree"></i>Concediu — zi libera</span>
+      <span><i class="sw sw-hol">1</i>Sarbatoare legala</span>
+    </div>
+  </section>
+
+  <!-- ===== ADAUGA CONCEDIU ===== -->
+  <section class="card">
+    <h2 class="card-title">Adauga concediu</h2>
+    <form id="vacForm" class="vac-form">
+      <div class="two-col">
+        <label>Data de start<input type="date" id="vacStart" required></label>
+        <label>Data de final<input type="date" id="vacEnd" required></label>
+      </div>
+      <div class="vac-preview" id="vacPreview">Alege perioada pentru a vedea cate zile se consuma.</div>
+      <button type="submit" class="btn-primary">Adauga concediu</button>
+    </form>
+  </section>
+
+  <!-- ===== LISTA CONCEDII ===== -->
+  <section class="card">
+    <h2 class="card-title">Concediile mele <span class="muted" id="vacCount"></span></h2>
+    <div id="vacList" class="vac-list"></div>
+  </section>
+
+  <footer class="app-footer">
+    <div class="ft-note">Datele se salveaza local pe telefon. Fa backup periodic din setari.</div>
+    <div class="ft-copy">&copy; <span id="ftYear">2026</span> Daniel Mazureac. Toate drepturile rezervate.</div>
+  </footer>
+</main>
+
+<!-- ===== SHEET: SETARI ===== -->
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<div class="sheet" id="settingsSheet" role="dialog" aria-label="Setari">
+  <div class="sheet-handle"></div>
+  <h2 class="sheet-title">Setari</h2>
+
+  <div class="sect-title">Tura mea <small>(se aplica imediat)</small></div>
+  <div class="team-pick" id="teamPick"></div>
+
+  <button type="button" class="sect-toggle" id="refToggle" aria-expanded="false" aria-controls="refBody">
+    <span class="st-lbl">Zile de referinta ture</span>
+    <span class="st-arrow">&#8250;</span>
+  </button>
+  <div class="sect-body" id="refBody" hidden>
+    <div class="sect-note">O zi in care tura respectiva a avut <b>tura de zi</b>.</div>
+    <div id="refRows"></div>
+  </div>
+
+  <button type="button" class="sect-toggle" id="holToggle" aria-expanded="false" aria-controls="holBody">
+    <span class="st-lbl">Sarbatori legale</span>
+    <span class="st-sub" id="holSub">calculate automat</span>
+    <span class="st-arrow">&#8250;</span>
+  </button>
+  <div class="sect-body" id="holBody" hidden>
+    <div class="hol-nav">
+      <button type="button" class="nav-btn small" id="holPrev" aria-label="Anul anterior">&#8249;</button>
+      <div class="hol-year" id="holYear">—</div>
+      <button type="button" class="nav-btn small" id="holNext" aria-label="Anul urmator">&#8250;</button>
+    </div>
+    <div class="hol-list" id="holList"></div>
+    <div class="hol-add">
+      <input type="date" id="holDate" aria-label="Data sarbatorii">
+      <input type="text" id="holName" placeholder="Denumire sarbatoare" maxlength="60" aria-label="Denumire">
+      <button type="button" class="btn-ghost" id="holAdd">Adauga</button>
+    </div>
+    <button type="button" class="btn-ghost full" id="holReset">Revino la sarbatorile automate</button>
+  </div>
+
+  <div class="sect-title">Zile concediu</div>
+  <div class="conc-grid">
+    <label class="field">
+      <span class="lbl">Zile pe an</span>
+      <input type="number" id="setDays" min="0" max="365" step="1" inputmode="numeric">
+    </label>
+    <label class="field">
+      <span class="lbl">Reportate <small>(anii precedenti)</small></span>
+      <input type="number" id="setCarry" min="0" max="365" step="1" inputmode="numeric">
+    </label>
+  </div>
+
+  <div class="sheet-actions">
+    <button class="btn-primary" id="saveSettings">Salveaza</button>
+    <button class="btn-ghost" id="closeSettings">Inchide</button>
+  </div>
+
+  <div class="sheet-sep"></div>
+  <div class="sect-title" style="margin-top:0">Backup si siguranta</div>
+  <div class="bk-hint" id="bkHint"></div>
+
+  <button type="button" class="bk-main" id="btnExcel">
+    <span class="bk-ico">XLS</span>
+    <span class="bk-txt">
+      <b>Salveaza backup</b>
+      <small>Un fisier Excel cu tot: concedii, calendarul anului <i id="bkYear">—</i>, sarbatori</small>
+    </span>
+  </button>
+
+  <button type="button" class="bk-second" id="btnRestore">
+    <span class="bk-txt">
+      <b>Restaureaza dintr-un backup</b>
+      <small>Incarca fisierul salvat mai devreme</small>
+    </span>
+  </button>
+  <input type="file" id="fileImport" accept=".xlsx,.json,application/json" hidden>
+
+  <div class="bk-paste" id="bkPaste" hidden>
+    <button type="button" class="btn-ghost full" id="rsFile" style="margin-top:0">Alege fisierul de backup</button>
+    <div class="bk-or">sau lipeste textul backup</div>
+    <textarea id="bkText" rows="3" placeholder="{&quot;myTeam&quot;: ..." spellcheck="false"></textarea>
+    <button type="button" class="btn-ghost full" id="bkTextOk" style="margin-top:0">Restaureaza din text</button>
+    <button type="button" class="bk-link" id="bkCopy">Copiaza datele ca text (pentru o nota / e-mail)</button>
+  </div>
+</div>
+
+<!-- ===== SHEET: DETALIU ZI ===== -->
+<div class="sheet" id="daySheet" role="dialog" aria-label="Detaliu zi">
+  <div class="sheet-handle"></div>
+  <h2 class="sheet-title" id="dsTitle">—</h2>
+  <div class="ds-row hol-row" id="dsHolRow" hidden><span>Sarbatoare legala</span><b id="dsHol">—</b></div>
+  <div class="ds-row"><span>Tura de zi <small>06:00–18:00</small></span><b id="dsDay">—</b></div>
+  <div class="ds-row"><span>Tura de noapte <small>18:00–06:00</small></span><b id="dsNight">—</b></div>
+  <div class="ds-sep"></div>
+  <div class="ds-row"><span>Tura ta (<b id="dsMyTeam">—</b>)</span><b id="dsShift">—</b></div>
+  <div class="ds-row"><span>Concediu</span><b id="dsVac">—</b></div>
+  <div class="ds-row"><span>Consuma zi concediu</span><b id="dsConsume">—</b></div>
+  <div class="sheet-actions">
+    <button class="btn-ghost" id="dsClose">Inchide</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="xlsx.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

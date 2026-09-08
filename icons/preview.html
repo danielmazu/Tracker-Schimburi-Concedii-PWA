@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iconite — Ture &amp; Concediu</title>
+<style>
+  :root{ --bg:#0b0f16; --card:#151d2b; --line:#243044; --txt:#e8edf6; --txt2:#93a1b8; --txt3:#5f6e86 }
+  *{box-sizing:border-box}
+  body{margin:0;padding:26px 18px 40px;background:var(--bg);color:var(--txt);
+       font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif}
+  h1{font-size:19px;margin:0 0 4px}
+  p.sub{color:var(--txt3);font-size:12.5px;margin:0 0 24px}
+  h2{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--txt3);
+     margin:28px 0 12px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+  .row{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end}
+  .item{text-align:center}
+  .item img{display:block;background:#000;border:1px solid var(--line)}
+  .item span{display:block;font-size:10.5px;color:var(--txt3);margin-top:6px}
+  /* simulare ecran principal: colturi rotunjite ca pe telefon */
+  .home{display:flex;flex-wrap:wrap;gap:22px;background:linear-gradient(160deg,#1e2a44,#0d1524);
+        padding:22px;border-radius:16px;border:1px solid var(--line)}
+  .app{width:60px;text-align:center}
+  .app img{width:60px;height:60px;border-radius:14px;display:block}
+  .app b{display:block;font-size:10px;font-weight:500;color:#fff;margin-top:6px;
+         text-shadow:0 1px 3px rgba(0,0,0,.7)}
+  /* simulare maskable: decupaj circular, cum face Android */
+  .circ img{border-radius:50%}
+  .note{font-size:11.5px;color:var(--txt3);margin-top:10px;line-height:1.6}
+  code{background:var(--card);padding:1px 5px;border-radius:4px;font-size:11px;color:var(--txt2)}
+</style>
+</head>
+<body>
+
+<h1>Iconite PWA — Ture &amp; Concediu</h1>
+<p class="sub">Soare = tura de zi &middot; semiluna = tura de noapte. Sursa: <code>icon.svg</code> &rarr; <code>python make_icons.py</code></p>
+
+<h2>Cum arata pe ecranul principal (60&nbsp;px)</h2>
+<div class="home">
+  <div class="app"><img src="icon-192.png" alt=""><b>Ture</b></div>
+  <div class="app circ"><img src="icon-maskable-512.png" alt=""><b>Ture</b></div>
+  <div class="app"><img src="icon.svg" alt=""><b>Ture</b></div>
+</div>
+<div class="note">Al doilea exemplu simuleaza decupajul circular aplicat de Android pe iconitele <code>maskable</code>.</div>
+
+<h2>Dimensiuni reale</h2>
+<div class="row">
+  <div class="item"><img src="icon.svg" width="128" height="128" alt=""><span>icon.svg</span></div>
+  <div class="item"><img src="icon-512.png" width="128" height="128" alt=""><span>512 &rarr; 128</span></div>
+  <div class="item"><img src="icon-192.png" width="192" height="192" alt=""><span>icon-192.png</span></div>
+  <div class="item"><img src="icon-maskable-512.png" width="128" height="128" alt=""><span>maskable 512</span></div>
+</div>
+
+<h2>Test de lizibilitate la dimensiuni mici</h2>
+<div class="row">
+  <div class="item"><img src="icon-512.png" width="16" height="16" alt=""><span>16</span></div>
+  <div class="item"><img src="icon-512.png" width="24" height="24" alt=""><span>24</span></div>
+  <div class="item"><img src="icon-512.png" width="32" height="32" alt=""><span>32</span></div>
+  <div class="item"><img src="icon-512.png" width="48" height="48" alt=""><span>48</span></div>
+  <div class="item"><img src="icon-512.png" width="60" height="60" alt=""><span>60</span></div>
+  <div class="item"><img src="icon-512.png" width="76" height="76" alt=""><span>76</span></div>
+</div>
+<div class="note">Daca la 24&nbsp;px cele doua forme nu se mai distic, ingroasa razele (<code>RAY_W</code>) sau mareste distanta dintre jumatati (<code>GAP</code>) in <code>make_icons.py</code>.</div>
+
+</body>
+</html>
