@@ -74,8 +74,11 @@ button,input{font-family:inherit;font-size:16px}
 }
 .icon-btn{
   background:var(--card);border:1px solid var(--line);color:var(--txt2);
-  width:35px;height:35px;border-radius:10px;display:grid;place-items:center;cursor:pointer;transition:.15s;flex:none;
+  width:35px;height:35px;min-width:35px;min-height:35px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:.15s;flex:none;padding:0;
 }
+.icon-btn svg{flex:none;display:block}
 .icon-btn:active{transform:scale(.93);color:var(--txt)}
 
 main{padding:10px var(--pad) 0;max-width:540px;margin:0 auto}
