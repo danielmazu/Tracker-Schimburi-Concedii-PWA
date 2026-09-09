@@ -312,6 +312,41 @@ function usedInYear(year) {
   for (const v of state.vacations) n += countVacation(parseISO(v.start), parseISO(v.end), year).consumate;
   return n;
 }
+/**
+ * Calculeaza orele pentru luna `month` (0-based) din anul `year`:
+ *  - normHours:  zile lucratoare (L-V minus sarbatori legale active) × 8
+ *  - plannedHours: ture planificate ale utilizatorului × 12
+ *    (tura de noapte din ultima zi a lunii se pune integral in luna curenta)
+ *  - extraHours: plannedHours - normHours (poate fi negativ)
+ */
+function calcMonthHours(year, month) {
+  const dim = new Date(year, month + 1, 0).getDate();
+  let workDays = 0, plannedShifts = 0;
+  for (let d = 1; d <= dim; d++) {
+    const date = new Date(year, month, d);
+    const dow  = date.getDay();                          // 0=Dum..6=Sam
+    // zile lucratoare = L-V fara sarbatori legale active
+    if (dow >= 1 && dow <= 5 && !holidayName(date)) workDays++;
+    // ture planificate: zi si noapte; noapte din ultima zi a lunii = in aceasta luna
+    const s = myShift(date);
+    if (s === 'zi' || s === 'noapte') plannedShifts++;
+  }
+  const normHours    = workDays * 8;
+  const plannedHours = plannedShifts * 12;
+  return { normHours, plannedHours, extraHours: plannedHours - normHours };
+}
+
+function renderMonthHours() {
+  const el = $('monthHours'); if (!el) return;
+  const { normHours, plannedHours, extraHours } = calcMonthHours(viewY, viewM);
+  const sign  = extraHours > 0 ? '+' : '';
+  const color = extraHours > 0 ? 'var(--zi)' : extraHours < 0 ? 'var(--danger)' : 'var(--conc)';
+  $('mhNorm').textContent    = normHours + 'h';
+  $('mhPlanned').textContent = plannedHours + 'h';
+  $('mhExtra').textContent   = sign + extraHours + 'h';
+  $('mhExtra').style.color   = color;
+}
+
 function overlaps(s, e) {
   return state.vacations.some(v => {
     const vs = parseISO(v.start), ve = parseISO(v.end);
@@ -338,6 +373,7 @@ function renderAll() {
   $('lgMine').textContent      = TEAMS[myTeam()];      // legenda arata tura TA reala
   renderNext();
   renderStats();
+  renderMonthHours();
   renderCalendar();
   renderVacList();
   renderPreview();
@@ -602,10 +638,10 @@ function toast(msg) {
 
 /* ═══════════════════  9. EVENIMENTE  ═══════════════════ */
 
-$('prevMonth').onclick = () => { if (--viewM < 0)  { viewM = 11; viewY--; } renderCalendar(); renderStats(); };
-$('nextMonth').onclick = () => { if (++viewM > 11) { viewM = 0;  viewY++; } renderCalendar(); renderStats(); };
-$('prevYear').onclick  = () => { viewY--; renderCalendar(); renderStats(); };
-$('nextYear').onclick  = () => { viewY++; renderCalendar(); renderStats(); };
+$('prevMonth').onclick = () => { if (--viewM < 0)  { viewM = 11; viewY--; } renderCalendar(); renderStats(); renderMonthHours(); };
+$('nextMonth').onclick = () => { if (++viewM > 11) { viewM = 0;  viewY++; } renderCalendar(); renderStats(); renderMonthHours(); };
+$('prevYear').onclick  = () => { viewY--; renderCalendar(); renderStats(); renderMonthHours(); };
+$('nextYear').onclick  = () => { viewY++; renderCalendar(); renderStats(); renderMonthHours(); };
 $('calTitle').onclick  = () => {
   const t = new Date(); viewY = t.getFullYear(); viewM = t.getMonth(); selected = t;
   renderCalendar(); renderStats(); toast('Am revenit la luna curenta');

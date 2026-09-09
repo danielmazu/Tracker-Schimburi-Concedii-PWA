@@ -3,7 +3,7 @@
    cu update in fundal (stale-while-revalidate).
    ATENTIE: creste CACHE_VERSION la fiecare modificare de fisiere. */
 
-const CACHE_VERSION = 'ture-v21';
+const CACHE_VERSION = 'ture-v23';
 const ASSETS = [
   './',
   './index.html',

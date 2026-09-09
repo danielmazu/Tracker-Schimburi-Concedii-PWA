@@ -1,7 +1,7 @@
 {
-  "name": "Ture & Concediu",
-  "short_name": "Concedii Egger",
-  "description": "Tracker pentru ture 12/24 si concediu de odihna",
+  "name": "Schimburi & Concediu",
+  "short_name": "Tracker Concedii",
+  "description": "Tracker pentru schimburi 12/24 si concediu de odihna",
   "lang": "ro",
   "dir": "ltr",
   "start_url": "./index.html",
