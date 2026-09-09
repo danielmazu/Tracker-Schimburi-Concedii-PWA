@@ -95,7 +95,7 @@ main{padding:10px var(--pad) 0;max-width:540px;margin:0 auto}
 }
 .mh-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:2px;padding:3px 2px}
 .mh-lbl{font-size:clamp(8px,2.4vw,9.5px);color:var(--txt2);text-align:center;line-height:1.3;text-transform:uppercase;letter-spacing:.4px;font-weight:700}
-.mh-lbl small{text-transform:none;letter-spacing:0;font-size:inherit;display:inline;opacity:.8;font-weight:400}
+.mh-lbl small{text-transform:none;letter-spacing:0;font-size:inherit;display:block;opacity:.8;font-weight:400}
 .month-hours b{font-size:clamp(15px,4.8vw,19px);font-weight:750;letter-spacing:-.3px;line-height:1.1}
 .mh-sep{width:1px;background:var(--line);margin:4px 0;flex:none}
 
@@ -466,8 +466,7 @@ input:focus{outline:none;border-color:var(--noapte)}
   .chip{height:12px;line-height:12px;font-size:8px}
   .nav-btn{min-width:26px;height:26px;font-size:13px}
   .mh-lbl small{display:block}
-}
-/* ecrane late / landscape */
+}/* ecrane late / landscape */
 @media (min-width:560px){
   .cell{min-height:62px}
 }
