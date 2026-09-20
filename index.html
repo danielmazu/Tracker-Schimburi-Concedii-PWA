@@ -168,16 +168,19 @@
     <button type="button" class="btn-ghost full" id="holReset">Revino la sarbatorile automate</button>
   </div>
 
-  <div class="sect-title">Zile concediu</div>
-  <div class="conc-grid">
-    <label class="field">
-      <span class="lbl">Zile pe an</span>
-      <input type="number" id="setDays" min="0" max="365" step="1" inputmode="numeric">
-    </label>
-    <label class="field">
-      <span class="lbl">Reportate <small>(anii precedenti)</small></span>
-      <input type="number" id="setCarry" min="0" max="365" step="1" inputmode="numeric">
-    </label>
+  <button type="button" class="sect-toggle" id="concToggle" aria-expanded="false" aria-controls="concBody">
+    <span class="st-lbl">Zile concediu pe an</span>
+    <span class="st-sub" id="concSub">—</span>
+    <span class="st-arrow">&#8250;</span>
+  </button>
+  <div class="sect-body" id="concBody" hidden>
+    <div class="sect-note">Seteaza cate zile de concediu ai pentru fiecare an. Zilele neutilizate se <b>reporteaza automat</b> in anul urmator.</div>
+    <div id="concRows"></div>
+    <div class="conc-add">
+      <input type="number" id="concAddYear" min="2000" max="2100" step="1" inputmode="numeric" placeholder="An (ex: 2027)">
+      <input type="number" id="concAddDays" min="0" max="365" step="1" inputmode="numeric" placeholder="Zile">
+      <button type="button" class="btn-ghost" id="concAddBtn">Adauga</button>
+    </div>
   </div>
 
   <div class="sheet-actions">

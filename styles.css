@@ -305,6 +305,38 @@ input:focus{outline:none;border-color:var(--noapte)}
 }
 .conc-grid .lbl small{font-weight:400;color:var(--txt3);font-size:clamp(8.5px,2.5vw,10px);white-space:nowrap}
 .conc-grid input{text-align:center;width:100%}
+
+/* ---------- per-year vacation day rows ---------- */
+.conc-rows{display:flex;flex-direction:column;gap:5px;margin-bottom:8px}
+.conc-row{
+  display:grid;grid-template-columns:clamp(46px,13vw,56px) 1fr auto auto;
+  align-items:center;gap:7px;
+  background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:7px 9px;
+}
+.conc-row .cr-year{
+  font-size:clamp(12px,3.5vw,13.5px);font-weight:800;color:var(--txt2);text-align:center;
+}
+.conc-row.cr-current .cr-year{color:var(--conc)}
+.conc-row input[type=number]{
+  background:var(--bg2);border:1px solid var(--line);color:var(--txt);
+  padding:6px 8px;border-radius:8px;width:100%;text-align:center;font-size:14px;font-weight:700;
+}
+.conc-row input[type=number]:focus{outline:none;border-color:var(--noapte)}
+.cr-carry{
+  font-size:clamp(9px,2.6vw,10.5px);color:var(--txt3);white-space:nowrap;text-align:right;line-height:1.35;
+}
+.cr-carry b{color:var(--conc);font-weight:750}
+.cr-del{
+  background:transparent;border:1px solid #5c2222;color:var(--danger);
+  width:26px;height:26px;border-radius:7px;cursor:pointer;flex:none;padding:0;font-size:15px;line-height:1;
+}
+.conc-add{display:grid;grid-template-columns:1fr 1fr auto;gap:7px;margin-top:4px}
+.conc-add input{padding:8px 9px}
+.conc-add .btn-ghost{flex:none;padding:9px 12px}
+@media (max-width:400px){
+  .conc-add{grid-template-columns:1fr 1fr}
+  .conc-add .btn-ghost{grid-column:1/-1}
+}
 .sheet-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .sheet-sep{height:1px;background:var(--line);margin:14px 0 11px}
 

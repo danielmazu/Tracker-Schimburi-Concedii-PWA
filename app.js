@@ -198,11 +198,11 @@ const KEY_OLD = 'ture-concediu.v1';
 
 function defaults() {
   const t = todayISO();
+  const y = new Date().getFullYear();
   return {
     myTeam: 0,
     refDates: [t, shiftISO(t, -1), shiftISO(t, -2), shiftISO(t, -3)],
-    annualDays: 22,
-    carryOver: 0,
+    annualDaysByYear: { [y]: 22 },   // { 'YYYY': numar } — zile per an
     vacations: [],
     holExtra: {},      // { 'YYYY-MM-DD': 'Denumire' } adaugate/redenumite manual
     holHidden: [],     // ['YYYY-MM-DD'] dezactivate manual
@@ -217,13 +217,39 @@ function normalize(s) {
   const out = {
     myTeam: 0,
     refDates: d.refDates.slice(),
-    annualDays: Number.isFinite(+s.annualDays) ? Math.max(0, +s.annualDays) : 22,
-    carryOver:  Number.isFinite(+s.carryOver)  ? Math.max(0, +s.carryOver)  : 0,
+    annualDaysByYear: {},
     vacations:  Array.isArray(s.vacations) ? s.vacations : [],
     holExtra:   {},
     holHidden:  Array.isArray(s.holHidden) ? s.holHidden.filter(k => parseISO(k)) : [],
     lastExport: typeof s.lastExport === 'string' ? s.lastExport : null
   };
+
+  /* ----- migrare din format vechi (annualDays + carryOver) ----- */
+  if (s.annualDaysByYear && typeof s.annualDaysByYear === 'object' && !Array.isArray(s.annualDaysByYear)) {
+    for (const y in s.annualDaysByYear) {
+      const yr = parseInt(y, 10), val = +s.annualDaysByYear[y];
+      if (yr >= 2000 && yr <= 2100 && Number.isFinite(val)) out.annualDaysByYear[yr] = Math.max(0, val);
+    }
+  } else {
+    /* format vechi: annualDays + optional carryOver → le punem pe anul curent si pe eventualii ani cu concedii */
+    const legacyDays  = Number.isFinite(+s.annualDays) ? Math.max(0, +s.annualDays) : 22;
+    const legacyCarry = Number.isFinite(+s.carryOver)  ? Math.max(0, +s.carryOver)  : 0;
+    const curY = new Date().getFullYear();
+    /* reconstituim anii din vacations */
+    const vacYears = new Set(
+      (Array.isArray(s.vacations) ? s.vacations : [])
+        .map(v => parseInt((v.start || '').slice(0, 4), 10))
+        .filter(y => y >= 2000 && y <= 2100)
+    );
+    vacYears.add(curY);
+    [...vacYears].sort().forEach((y, idx) => {
+      /* primul an cu concedii primeste si carry-over-ul legacy ca zile suplimentare */
+      out.annualDaysByYear[y] = legacyDays + (idx === 0 ? legacyCarry : 0);
+    });
+  }
+  /* garanteaza cel putin anul curent */
+  if (!Object.keys(out.annualDaysByYear).length) out.annualDaysByYear[new Date().getFullYear()] = 22;
+
   if (s.holExtra && typeof s.holExtra === 'object') {
     for (const k in s.holExtra) {
       if (parseISO(k) && typeof s.holExtra[k] === 'string' && s.holExtra[k].trim()) {
@@ -294,6 +320,26 @@ function humanDelta(ms) {
 }
 
 /* ═══════════════════  4. LOGICA CONCEDII  ═══════════════════ */
+
+/**
+ * Numarul de zile alocate pentru `year`, inclusiv reportate din anii precedenti.
+ * Reportul = zilele ramase (neutilizate) din year-1, calculat recursiv pana la
+ * cel mai vechi an configurat. Daca `year` nu are o alocare explicita, returneaza
+ * doar reportul din anul anterior (fara alocare proprie = 0 zile noi).
+ */
+function totalForYear(year) {
+  const own = (year in state.annualDaysByYear)
+    ? Math.max(0, +state.annualDaysByYear[year] || 0)
+    : 0;
+  /* cel mai vechi an configurat — nu mai recursam in trecut */
+  const years = Object.keys(state.annualDaysByYear).map(Number).sort((a, b) => a - b);
+  if (!years.length || year <= years[0]) return own;
+  /* report din anul anterior = totalForYear(year-1) - usedInYear(year-1), minim 0 */
+  const prevTotal = totalForYear(year - 1);
+  const prevUsed  = usedInYear(year - 1);
+  const carryOver = Math.max(0, prevTotal - prevUsed);
+  return own + carryOver;
+}
 
 let _vset = null;
 function vacationSet() {
@@ -406,7 +452,7 @@ function renderNext() {
 }
 
 function renderStats() {
-  const total = (+state.annualDays || 0) + (+state.carryOver || 0);
+  const total = totalForYear(viewY);
   const used  = usedInYear(viewY);
   const left  = total - used;
   $('statTotal').textContent = total;
@@ -414,7 +460,9 @@ function renderStats() {
   $('statLeft').textContent  = left;
   $('statLeft').style.color  = left < 0 ? 'var(--danger)' : 'var(--conc)';
   $('statBar').style.width   = total > 0 ? Math.min(100, Math.max(0, used / total * 100)) + '%' : '0%';
-  $('statYear').textContent  = `Concediu ${viewY}` + (state.carryOver > 0 ? ` · include ${state.carryOver} reportate` : '');
+  const own = +state.annualDaysByYear[viewY] || 0;
+  const carry = total - own;
+  $('statYear').textContent  = `Concediu ${viewY}` + (carry > 0 ? ` · include ${carry} reportate` : '');
 }
 
 function cellHTML(date, isPad) {
@@ -531,19 +579,93 @@ function openDaySheet(d) {
 
 function openSettings() {
   draftRefs = state.refDates.slice();
-  $('setDays').value  = state.annualDays;
-  $('setCarry').value = state.carryOver;
   holViewY = viewY;
   // secitunile pliabile pornesc mereu inchise
   collapse('refBody', 'refToggle');
   collapse('holBody', 'holToggle');
-  renderTeamPick(); renderRefRows(); renderHolList(); renderBackupHint();
+  collapse('concBody', 'concToggle');
+  renderTeamPick(); renderRefRows(); renderHolList(); renderConcRows(); renderBackupHint();
   $('bkPaste').hidden = true; $('bkText').value = '';
   $('bkYear').textContent = viewY;
   openSheet($('settingsSheet'));
 }
 
-/* ---------- gestionare sarbatori legale (se aplica imediat) ---------- */
+/* ---------- gestionare zile concediu per an ---------- */
+
+function concYearsToShow() {
+  /* toti anii configurati + toti anii cu concedii inregistrate + anul curent */
+  const set = new Set(Object.keys(state.annualDaysByYear).map(Number));
+  for (const v of state.vacations) {
+    const y = parseInt((v.start || '').slice(0, 4), 10);
+    if (y >= 2000 && y <= 2100) set.add(y);
+  }
+  set.add(new Date().getFullYear());
+  return [...set].sort((a, b) => a - b);
+}
+
+function renderConcRows() {
+  /* rezumat pe butonul toggle */
+  const years = Object.keys(state.annualDaysByYear).map(Number).sort((a, b) => a - b);
+  const n = years.length;
+  $('concSub').textContent = n
+    ? `${n} ${n === 1 ? 'an configurat' : 'ani configurati'}`
+    : '—';
+
+  if ($('concBody').hidden) return;
+
+  const curY = new Date().getFullYear();
+  const allYears = concYearsToShow();
+  const box = $('concRows');
+  box.className = 'conc-rows';
+
+  box.innerHTML = allYears.map(y => {
+    const own   = y in state.annualDaysByYear ? +state.annualDaysByYear[y] : 0;
+    const total = totalForYear(y);
+    const carry = total - own;
+    const used  = usedInYear(y);
+    const left  = total - used;
+    const isCur = y === curY;
+    const hasOwn = y in state.annualDaysByYear;
+    return `<div class="conc-row${isCur ? ' cr-current' : ''}">
+      <span class="cr-year">${y}</span>
+      <input type="number" min="0" max="365" step="1" inputmode="numeric"
+             data-y="${y}" value="${hasOwn ? own : ''}" placeholder="${hasOwn ? '' : '—'}"
+             aria-label="Zile concediu ${y}">
+      <span class="cr-carry">${carry > 0 ? `+<b>${carry}</b> rep.` : ''}<br><span style="color:var(--txt3)">${used} cons. · <b style="color:${left<0?'var(--danger)':'var(--conc)'}">${left} ram.</b></span></span>
+      ${hasOwn ? `<button type="button" class="cr-del" data-y="${y}" aria-label="Sterge ${y}" title="Sterge anul ${y}">&times;</button>` : '<span style="width:26px;flex:none"></span>'}
+    </div>`;
+  }).join('');
+
+  box.querySelectorAll('input[type=number]').forEach(inp => {
+    inp.addEventListener('change', () => {
+      const y = +inp.dataset.y;
+      const v = parseInt(inp.value, 10);
+      if (!isNaN(v) && v >= 0) {
+        state.annualDaysByYear[y] = v;
+        save(); renderConcRows(); renderStats();
+      }
+    });
+  });
+  box.querySelectorAll('.cr-del').forEach(b => {
+    b.addEventListener('click', () => {
+      const y = +b.dataset.y;
+      delete state.annualDaysByYear[y];
+      save(); renderConcRows(); renderStats();
+      toast(`${y}: alocare stearsa`);
+    });
+  });
+}
+
+function addConcYear() {
+  const y = parseInt($('concAddYear').value, 10);
+  const d = parseInt($('concAddDays').value, 10);
+  if (!y || y < 2000 || y > 2100) return toast('An invalid (2000–2100)');
+  if (isNaN(d) || d < 0)          return toast('Numar de zile invalid');
+  state.annualDaysByYear[y] = d;
+  $('concAddYear').value = ''; $('concAddDays').value = '';
+  save(); renderConcRows(); renderStats();
+  toast(`${y}: ${d} zile salvate`);
+}
 
 function renderHolList() {
   // rezumat pe butonul de deschidere: cate modificari manuale exista
@@ -710,6 +832,9 @@ function toggleSection(bodyId, btnId, onOpen) {
 
 $('refToggle').onclick = () => toggleSection('refBody', 'refToggle', renderRefRows);
 $('holToggle').onclick = () => toggleSection('holBody', 'holToggle', renderHolList);
+$('concToggle').onclick = () => toggleSection('concBody', 'concToggle', renderConcRows);
+$('concAddBtn').onclick = addConcYear;
+$('concAddDays').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addConcYear(); } });
 $('holPrev').onclick  = () => { holViewY--; renderHolList(); };
 $('holNext').onclick  = () => { holViewY++; renderHolList(); };
 $('holAdd').onclick   = addHoliday;
@@ -722,9 +847,7 @@ $('holReset').onclick = () => {
 
 $('saveSettings').onclick = () => {
   if (draftRefs.some(r => !parseISO(r))) return toast('Toate cele 4 ture au nevoie de o data de referinta');
-  state.refDates   = draftRefs.slice();
-  state.annualDays = Math.max(0, parseInt($('setDays').value, 10)  || 0);
-  state.carryOver  = Math.max(0, parseInt($('setCarry').value, 10) || 0);
+  state.refDates = draftRefs.slice();
   save(); closeSheets(); renderAll(); toast('Setari salvate');
 };
 
@@ -781,8 +904,10 @@ function buildWorkbook(year) {
   const sheets = [];
 
   /* --- Foaia 1: Rezumat --- */
-  const total = (+state.annualDays || 0) + (+state.carryOver || 0);
-  const years = [...new Set(state.vacations.map(v => +v.start.slice(0, 4)))].sort();
+  const years = [...new Set([
+    ...Object.keys(state.annualDaysByYear).map(Number),
+    ...state.vacations.map(v => +v.start.slice(0, 4))
+  ])].filter(y => y >= 2000 && y <= 2100).sort();
   if (!years.length) years.push(year);
 
   const r1 = [
@@ -791,9 +916,6 @@ function buildWorkbook(year) {
     [],
     [{ v: 'CONFIGURARE', s: S.BOLD }],
     ['Tura mea', TEAMS[myTeam()]],
-    ['Zile de concediu pe an', +state.annualDays || 0],
-    ['Reportate din anii precedenti', +state.carryOver || 0],
-    [{ v: 'Total disponibil', s: S.BOLD }, { v: total, s: S.BOLD }],
     [],
     [{ v: 'ZILE DE REFERINTA (tura de zi)', s: S.BOLD }],
     [H('Tura'), H('Zi de referinta'), H('Ziua saptamanii')]
@@ -803,14 +925,18 @@ function buildWorkbook(year) {
     r1.push([{ v: t + (i === myTeam() ? '  (tura mea)' : ''), s: S.BOLD },
              d ? fmtShort(d) : '—', d ? ZILE[d.getDay()] : '—']);
   });
-  r1.push([], [{ v: 'EVIDENTA PE ANI', s: S.BOLD }], [H('An'), H('Consumate'), H('Ramase')]);
+  r1.push([], [{ v: 'EVIDENTA PE ANI', s: S.BOLD }],
+    [H('An'), H('Zile alocate'), H('Reportate din anterior'), H('Total disponibil'), H('Consumate'), H('Ramase')]);
   years.forEach(y => {
-    const u = usedInYear(y);
-    r1.push([y, u, total - u]);
+    const own   = y in state.annualDaysByYear ? +state.annualDaysByYear[y] : 0;
+    const total = totalForYear(y);
+    const carry = total - own;
+    const used  = usedInYear(y);
+    r1.push([y, own, carry > 0 ? carry : 0, total, used, total - used]);
   });
   r1.push([], [{ v: 'Sistem: 12/24 in 4 ture — Zi, Noapte, Liber, Liber (ciclu de 4 zile).', s: S.MUTED }],
              [{ v: 'Concediul se scade doar in zilele cu tura (zi sau noapte).', s: S.MUTED }]);
-  sheets.push({ name: 'Rezumat', cols: [32, 16, 14], rows: r1 });
+  sheets.push({ name: 'Rezumat', cols: [32, 14, 20, 16, 12, 10], rows: r1 });
 
   /* --- Foaia 2: Concedii --- */
   const r2 = [[H('Nr'), H('Start'), H('Final'),
